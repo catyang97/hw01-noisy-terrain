@@ -16,7 +16,7 @@ out vec4 fs_Col;
 out float fs_Sine;
 out float fs_Height;
 out float fs_Moisture;
-const vec4 lightPos = vec4(1.0, 2.0, 1.0, 1.0);
+const vec4 lightPos = vec4(1.0, 6.0, 1.0, 1.0);
 out vec4 fs_LightVec;
 
 
@@ -50,8 +50,6 @@ float interpNoise2D(float x, float y) { //from slides
 }
 
 // Create a height field based on summed fractal noise
-// Adjust distribution of noise values so they are biased to various height values, 
-// or even radically remap height values entirely! 
 float fbm(float x, float y) { //from slides
   float total = 0.0f;
   float persistence = 0.5f;
@@ -67,15 +65,15 @@ float fbm(float x, float y) { //from slides
 
 void main()
 {
-
-
   float elevation = fbm((vs_Pos.x + u_PlanePos.x) / 8.0, (vs_Pos.z + u_PlanePos.y) / 8.0);
-  elevation = pow(elevation, 3.0) * floor(elevation); // or multiply
-  // elevation = pow(elevation, 5.0) * floor(elevation) * random1(vec2(vs_Pos.z + u_PlanePos.y), vec2(100.f, 200.f)) * random1(vec2(vs_Pos.x + u_PlanePos.x), vec2(1.f, 1.f)); // melting ice caps
+  elevation = pow(elevation, 3.0) * floor(elevation);
+  if (elevation >= 3.5) {
+    elevation = 3.5;
+  }
+  
   fs_Height = elevation;
   fs_Pos = vec3(vs_Pos.x, elevation, vs_Pos.z);
-
-  fs_Moisture = fbm((vs_Pos.x + u_PlanePos.x) / 10.0, (vs_Pos.z + u_PlanePos.y) / 10.0);
+  fs_Moisture = fbm((vs_Pos.x + u_PlanePos.x) / 5.0, (vs_Pos.z + u_PlanePos.y) / 10.0);
   
   vec4 modelposition = vec4(vs_Pos.x, elevation, vs_Pos.z, 1.0);
   modelposition = u_Model * modelposition;

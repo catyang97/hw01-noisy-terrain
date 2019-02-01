@@ -2,6 +2,7 @@
 precision highp float;
 
 uniform vec2 u_PlanePos; // Our location in the virtual world displayed by the plane
+uniform float u_TimeOfDay;
 
 in vec3 fs_Pos;
 in vec4 fs_Nor;
@@ -43,9 +44,6 @@ float interpNoise2D(float x, float y) { //from slides
     return mix(i1, i2, fractY);
 }
 
-// Create a height field based on summed fractal noise
-// Adjust distribution of noise values so they are biased to various height values, 
-// or even radically remap height values entirely! 
 float fbm(float x, float y) { //from slides
   float total = 0.0f;
   float persistence = 0.5f;
@@ -59,37 +57,29 @@ float fbm(float x, float y) { //from slides
   return total;
 }
 
-
 vec3 color(float elevation, float moisture) {
     if (elevation <= 0.0) {
-        return vec3(16.0, 26.0, 95.0) / 255.0;
-    } else {
-        if (moisture >= 0.0) {
-                    return vec3(130.0, 221.0, 237.0) / 255.0;
-
+        if (u_TimeOfDay == 1.0) {
+            return vec3(16.0, 26.0, 95.0) * fbm(pow(elevation, 2.0), moisture * 5.0)/ 90.0;
         } else {
-            return vec3(255.0, 221.0, 237.0) / 255.0;
-
+            return vec3(66.0, 188.0, 244.0) * fbm(pow(elevation, 2.0), moisture)/ 60.0;
         }
+    } else {
+        return vec3(130.0, 221.0, 237.0) * fbm(elevation, moisture * 4.0)/ 100.0;
     }
 }
 
 void main()
 {
     float t = clamp(smoothstep(30.0, 50.0, length(fs_Pos)), 0.0, 1.0); // Distance fog
-    // out_Col = vec4(mix(vec3(0.5 * (color(fs_Height) + 1.0)), vec3(164.0 / 255.0, 233.0 / 255.0, 1.0), t), 1.0);
     vec4 temp = vec4(color(fs_Height, fs_Moisture), 1.0);
-    // vec4 temp = vec4(mix( vec3(0.5 * (fs_Height)),
-                    // vec3(164.0 / 255.0, 233.0 / 255.0, 1.0), t), 0.5);
-    // temp = vec4(fs_Pos.xyz, 1.0);
     temp = vec4(mix(color(fs_Height, fs_Moisture), temp.xyz, t), 0.5);
-
     float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
     float ambientTerm = 0.2;
     float lightIntensity = diffuseTerm + ambientTerm;
+    lightIntensity /= 2.0;
     if (fs_Height <= 0.0) {
         lightIntensity /= 2.0;
     }
-    out_Col = vec4(mix(vec3(temp.rgb * lightIntensity), vec3(0.5, 0.5, 0.5), t * 0.5), 1.0);
-
+    out_Col = vec4(mix(vec3(temp.rgb * lightIntensity), vec3(0.5, 0.5, 0.5), t * 0.5), 1.2);
 }
