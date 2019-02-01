@@ -4,6 +4,7 @@ uniform mat4 u_Model;
 uniform mat4 u_ModelInvTr;
 uniform mat4 u_ViewProj;
 uniform vec2 u_PlanePos; // Our location in the virtual world displayed by the plane
+uniform float u_Level;
 
 in vec4 vs_Pos;
 in vec4 vs_Nor;
@@ -65,12 +66,18 @@ float fbm(float x, float y) { //from slides
 
 void main()
 {
-  float elevation = fbm((vs_Pos.x + u_PlanePos.x) / 8.0, (vs_Pos.z + u_PlanePos.y) / 8.0);
-  elevation = pow(elevation, 3.0) * floor(elevation);
+  float elevation = 0.0;
+  if (u_Level == 1.0) {
+    elevation = fbm((vs_Pos.x + u_PlanePos.x) / 8.0, (vs_Pos.z + u_PlanePos.y) / 8.0);
+  } else {
+    elevation = fbm((vs_Pos.x + u_PlanePos.x) / 8.0, (vs_Pos.z + u_PlanePos.y) / 8.0) / (u_Level * 0.5);
+  }
+
+  elevation = pow(elevation, 3.0) * floor(elevation) / (u_Level);
   if (elevation >= 3.5) {
     elevation = 3.5;
   }
-  
+
   fs_Height = elevation;
   fs_Pos = vec3(vs_Pos.x, elevation, vs_Pos.z);
   fs_Moisture = fbm((vs_Pos.x + u_PlanePos.x) / 5.0, (vs_Pos.z + u_PlanePos.y) / 10.0);

@@ -11,7 +11,8 @@ import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
-  Time_Of_Day: 'Night'
+  Time_Of_Day: 'Night',
+  Global_Warming_Level: 1
 };
 
 let square: Square;
@@ -21,6 +22,7 @@ let aPressed: boolean;
 let sPressed: boolean;
 let dPressed: boolean;
 let planePos: vec2;
+let prevLevel: number;
 
 function loadScene() {
   square = new Square(vec3.fromValues(0, 0, 0));
@@ -82,6 +84,7 @@ function main() {
   // Add controls to the gui
   const gui = new DAT.GUI();
   gui.add(controls, 'Time_Of_Day', ['Night', 'Day']);
+  gui.add(controls, 'Global_Warming_Level', 1, 5).step(1);
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -139,12 +142,17 @@ function main() {
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
     processKeyPresses();
+
+    if (controls.Global_Warming_Level != prevLevel) {
+      prevLevel = controls.Global_Warming_Level;
+    }
+
     renderer.render(camera, lambert, [
       plane,
-    ], controls.Time_Of_Day);
+    ], controls.Time_Of_Day, controls.Global_Warming_Level);
     renderer.render(camera, flat, [
       square,
-    ], controls.Time_Of_Day);
+    ], controls.Time_Of_Day, controls.Global_Warming_Level);
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame

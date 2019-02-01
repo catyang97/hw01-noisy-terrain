@@ -31,6 +31,7 @@ class ShaderProgram {
   unifColor: WebGLUniformLocation;
   unifPlanePos: WebGLUniformLocation;
   unifTime: WebGLUniformLocation;
+  unifLevel: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -51,6 +52,7 @@ class ShaderProgram {
     this.unifViewProj   = gl.getUniformLocation(this.prog, "u_ViewProj");
     this.unifPlanePos   = gl.getUniformLocation(this.prog, "u_PlanePos");
     this.unifTime       = gl.getUniformLocation(this.prog, "u_TimeOfDay");
+    this.unifLevel      = gl.getUniformLocation(this.prog, "u_Level");
   }
 
   use() {
@@ -94,6 +96,13 @@ class ShaderProgram {
       gl.uniform1f(this.unifTime, 1.0);
     } else {
       gl.uniform1f(this.unifTime, 0.0);
+    }
+  }
+
+  setLevel(level: number) {
+    this.use();
+    if (this.unifLevel !== -1) {
+      gl.uniform1f(this.unifLevel, level);
     }
   }
 
