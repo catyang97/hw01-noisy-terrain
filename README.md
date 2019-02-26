@@ -1,7 +1,7 @@
 # CIS 566 Homework 1: Noisy Terrain
 ## Catherine Yang, PennKey: catyang
 
-## https://catyang97.github.io/hw01-noisy-terrain/
+## https://catyang97.github.io/noisy-terrain/
 
 ## Ice Caps
 ### Ice at Night
